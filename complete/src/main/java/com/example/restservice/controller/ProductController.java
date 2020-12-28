@@ -17,12 +17,13 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import com.example.restservice.Domain.Product;
-import com.example.restservice.entity.LoginEntity;
+import com.example.restservice.entity.UserEntity;
 import com.example.restservice.service.ProductService;
 
 @RestController
 public class ProductController {
 	private static final Logger log = LoggerFactory.getLogger(ProductController.class);
+	private static final String PRODUCT="product";
 	@Autowired
 	ProductService saveDomainService;
 	
@@ -32,7 +33,7 @@ public class ProductController {
 		List<Product> productList=saveDomainService.getAllProductDetails();
 		log.info("product list: "+productList);
 		model.put("productList",productList);
-		return new ModelAndView("product");
+		return new ModelAndView(PRODUCT);
 	}
 	
 	@RequestMapping("/createProduct")

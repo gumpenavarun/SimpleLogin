@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
-import com.example.restservice.entity.LoginEntity;
-import com.example.restservice.service.LoginService;
+import com.example.restservice.Domain.User;
+import com.example.restservice.service.UserService;
 
 @RestController
-public class LoginController {
+public class UserController {
 	@Autowired
-	LoginService loginService;
+	UserService userService;
 
-	private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+	private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
 	@GetMapping("/")
 	public ModelAndView welcome() {
@@ -35,30 +35,40 @@ public class LoginController {
 		log.info("Entered into Login, name:{}, password:{}", name, password);
 		RedirectView redirectView = new RedirectView();
 		redirectView.setContextRelative(true);
-		if (name == null || name.equals("") || password == null || password.equals("")) {
-			model.put("errorMessage", "please provide all Details ");
+
+		boolean userExists = userService.findUser(name, password);
+		if (!userExists) {
 			redirectView.setUrl("/errorPage");
-		}else {
-			redirectView.setUrl("/loadProducts");
+			return redirectView;
 		}
+		redirectView.setUrl("/loadProducts");
 		return redirectView;
 	}
 	@GetMapping("/errorPage")
-	public ModelAndView error() {
+	public ModelAndView error(Map<String, Object> model) {
+		model.put("errorMessage", "Invalid Credientals ");
+
 		log.info("Entered into error page");
-		return new ModelAndView("error");
-	}
-	@RequestMapping(value="/loadSignUp")
-	public ModelAndView loadSignUp(Map<String,Object> model) {
-		model.put("loginEntity", new LoginEntity());
-		return new ModelAndView("signUp");
-	}
-	
-	@PostMapping("/saveLogin")
-	public ModelAndView saveLogin(Map<String,Object> model, @ModelAttribute("login") LoginEntity loginEntity) {
-		log.info("I'm going to save product: "+loginEntity.getName());
-		loginService.saveLoginDetails(loginEntity);
-		model.put("successMessage", "Saved Login Details Successfully");
 		return new ModelAndView("login");
+	}
+
+	@RequestMapping(value = "/loadSignUp")
+	public ModelAndView loadSignUp(Map<String, Object> model) {
+		model.put("user", new User());
+		return new ModelAndView("createUser");
+	}
+
+	@PostMapping("/saveUser")
+	public ModelAndView saveLogin(Map<String, Object> model, @ModelAttribute("user") User user) {
+		log.info("User " + user.toString());
+		log.info("I'm going to save product: " + user.getFirstname());
+		/*
+		 * if(user.getFirstname().length()>25 ) { model.put("message",
+		 * "First Name Should not be greater 25 Characters"); return new
+		 * ModelAndView("createUser"); }
+		 */ // To validate from BackEnd
+		userService.saveLoginDetails(user);
+		model.put("message", "Saved Login Details Successfully");
+		return new ModelAndView("createUser");
 	}
 }
